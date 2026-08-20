@@ -1,0 +1,69 @@
+Exercise: n8n
+
+1. Objective
+
+In this practical exercise, you will create a smart AI assistant workflow in n8n.
+Instead of just a basic chatbot, your assistant will be able to understand your commands, check the weather, search for news, manage your calendar,
+and draft social media posts.
+
+2. Prerequisites
+
+To keep things smooth, make sure you have the following ready before you begin building:
+
+  · n8n Access: You need a working n8n environment. This can be the free self-hosted version on your computer, a DigitalOcean droplet, or the n8n Cloud version.
+
+  · AI Model API Key: You will need an active API key from an AI provider (like OpenAI/ChatGPT, Anthropic, etc.) to act as the "brain" of your assistant.
+
+  · External Service Accounts: * A Google account to connect Gmail (for sending emails) and Google Calendar (for creating events).
+
+      o A free API key from a weather service (like OpenWeatherMap or WeatherAPI) to fetch weather data.
+
+  · Basic Setup: Make sure you know how to add credentials in n8n so you can securely connect your AI model and Google accounts.
+
+3. Create the Entry Point (Webhook)
+
+Your assistant needs a way to listen for your commands.
+
+  · Open n8n and create a new workflow.
+
+  · Add a Webhook node. This will be the starting point of your workflow.
+
+  · Set it up to listen for a basic text input (for example, a test request saying "What is the weather today?").
+
+4. Add the "Brain" and Memory
+
+Your assistant needs to process your commands and remember the conversation.
+
+  · Connect an AI Agent node to your Webhook.
+
+  · Attach an AI Chat Model node (e.g., OpenAI) to the Agent so it can understand text.
+
+  · Attach a Memory node (e.g., Window Buffer Memory) so the AI remembers what you just talked about and doesn't lose context between messages.
+
+5. Give Your Assistant Skills (Tools)
+
+An AI is just a chatbot until you give it tools to interact with the world. Add the following tools to your AI Agent. Keep them simple and well-named so the AI knows when to use them:
+
+  1. The News Reader (MCP Requirement): Create a tool that searches the internet for trending news. Requirement: You must implement this specific feature as an MCP (Model Context Protocol) service.
+
+  2. The Weatherman: Use an HTTP Request tool (or a dedicated weather node) to pull current weather data for a specific city. Ensure the AI is instructed to specifically read and return the average temperature.
+
+  3. The Email Sender: Add a Gmail (or standard Email) tool so the AI can draft and send emails to a provided address.
+
+  4. The Scheduler: Add a Google Calendar tool. The AI should be able to take a prompt like "Book a meeting for tomorrow at 2 PM" and create the event.
+
+  5. The Social Media Manager: Create a custom tool or prompt instruction that formats the user's ideas into a ready-to-publish Facebook post.
+
+  6. Test Your Assistant
+
+Time to see if it works! Send test messages to your Webhook to check each skill:
+
+  · Test 1: "What is the average temperature in London right now?"
+
+  · Test 2: "What are the trending news topics today?"
+
+  · Test 3: "Schedule a brainstorming session in my calendar for tomorrow at 10:00 AM and send a confirmation email to [your email]."
+
+  · Test 4: "Write a Facebook post about how I just built my first AI agent in n8n."
+
+Check the Executions tab in n8n after each test to ensure the data is flowing correctly and the AI is picking the right tool for the job

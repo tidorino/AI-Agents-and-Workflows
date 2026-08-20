@@ -1,0 +1,117 @@
+{
+  "name": "News MCP",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "news"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        -32
+      ],
+      "id": "902bdcb6-c433-4021-8c0c-797867e7b7a7",
+      "name": "MCP Server Trigger",
+      "webhookId": "84205690-4557-4ce6-a599-733ef2c33aea"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Call this tool to retrieve positive news.",
+        "url": "https://www.positive.news/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedReadTool",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        192
+      ],
+      "id": "d68f3e41-e6b0-4b97-a12b-6e96d3b5419d",
+      "name": "retrive_positive_news"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Call this tool to search the internet for recent news about a given topic.",
+        "text": "={{ $fromAI('topic', 'The search query', 'string') }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        -608,
+        208
+      ],
+      "id": "f9fe03bd-5b08-468f-a852-dd38632ffbe1",
+      "name": "search_news"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -752,
+        416
+      ],
+      "id": "1501b8dd-c099-4b2e-a619-17a0652b64e9",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4QCzYJRnLyJdOxDO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "retrive_positive_news": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_news": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "search_news",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "876d4b57-df40-4643-861a-b7de4ab505a8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f91c10a867a3e8288e8b7b9a4c99f81e0b214263ed5023545d049df86d2546ea"
+  },
+  "nodeGroups": [],
+  "id": "s4lvNahacJGDSGXE",
+  "tags": []
+}

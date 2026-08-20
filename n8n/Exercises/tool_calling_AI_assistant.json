@@ -1,0 +1,331 @@
+{
+  "name": "Tool-Calling AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tool-calling-ai-assistant",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        48
+      ],
+      "id": "d5c9a4c4-4482-420c-b615-f0392b916eba",
+      "name": "Webhook",
+      "webhookId": "ee1d6116-2faa-45d5-90c2-875c15626e00"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Expected a non-empty input parameter"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        768,
+        -96
+      ],
+      "id": "0285447c-2b6d-46c8-9eef-c124c7e5bc1f",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "79167f79-cf47-4244-892c-483f736cfe81",
+              "leftValue": "={{ $json.body.input }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "dc72e049-e2fb-4f6b-b5ed-56bd290a7c43",
+              "leftValue": "={{ $json.body.sessionId}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        48
+      ],
+      "id": "c88126b8-6590-4a4b-a671-6801e1f124e2",
+      "name": "If input is invalid"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').first().json.body.input }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        704,
+        208
+      ],
+      "id": "da735a9d-fdef-4e19-ba67-2c69d4dd89b9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').first().json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        584,
+        424
+      ],
+      "id": "7bcb5030-1f09-408d-814d-fd51b2d02a34",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', `The name of the city and the 2-letter ISO code of the country separated by a comma.`, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        712,
+        424
+      ],
+      "id": "5974957d-4cad-47e7-9071-f6d799095d0d",
+      "name": "get_weather",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "0mBCOhWn1qzdchjV",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://localhost:5678/mcp/news",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        840,
+        424
+      ],
+      "id": "f567d66a-83b1-4828-a22d-0b5b1956fdce",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        456,
+        424
+      ],
+      "id": "df29346a-d32d-467a-8d06-e5753f592139",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4QCzYJRnLyJdOxDO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool to send an email.",
+        "sendTo": "teodoratrendafilova81@gmail.com",
+        "subject": "={{ $fromAI('subject', 'The subject of the mail', 'string') }}",
+        "message": "={{ $fromAI('message', 'The body of the mail in HTML format.', 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        968,
+        424
+      ],
+      "id": "43e060e4-8d11-4ce5-a60d-413169463eaa",
+      "name": "send_email",
+      "webhookId": "37275faa-1532-4e64-8489-3a3ef08a70af",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "lFUw4ts3KGGWXLaJ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Cal this tool to create a new event in Google Calender.",
+        "calendar": {
+          "__rl": true,
+          "value": "teodoratrendafilova81@gmail.com",
+          "mode": "list",
+          "cachedResultName": "teodoratrendafilova81@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": false,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1096,
+        424
+      ],
+      "id": "5b88fa9e-bdb7-4a2a-9ff9-627965e39140",
+      "name": "Create_event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8diX1JYbEt4UWaws",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If input is invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If input is invalid": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_weather": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2bff43b2-f01b-44df-899a-9ecf0742115b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f91c10a867a3e8288e8b7b9a4c99f81e0b214263ed5023545d049df86d2546ea"
+  },
+  "nodeGroups": [],
+  "id": "be7T6trGOqFhFETB",
+  "tags": []
+}

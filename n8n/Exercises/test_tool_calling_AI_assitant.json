@@ -1,0 +1,226 @@
+{
+  "name": "Test Tool-Calling AI Assitant",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        -32
+      ],
+      "id": "f845fe85-7720-4983-98f6-9b4cd1dd7795",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook-test/tool-calling-ai-assistant",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "What is the weather today in Plovdiv?"
+            },
+            {
+              "name": "sessionId",
+              "value": "weather-5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -384,
+        -48
+      ],
+      "id": "5d4aede4-536a-4943-aeee-b399d05c5b86",
+      "name": "Ask about the weather"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook-test/tool-calling-ai-assistant",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "What are the most reacent news about AI progress in mathematics. Give me top 3 interesting articles"
+            },
+            {
+              "name": "sessionId",
+              "value": "news-5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -128,
+        -48
+      ],
+      "id": "d6733dd6-a83a-4228-9dff-ba59636775ab",
+      "name": "Ask about the news"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook-test/tool-calling-ai-assistant",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "Give me some inspiration with  a bunch of positive news."
+            },
+            {
+              "name": "sessionId",
+              "value": "positive-news-1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "a6ac1502-2187-4fea-bafa-483e5de4865b",
+      "name": "Ask about the positive news"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook-test/tool-calling-ai-assistant",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "Find some inspiration from  positive news and write an email with top 5 most interesting findings."
+            },
+            {
+              "name": "sessionId",
+              "value": "mail-1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        256,
+        -48
+      ],
+      "id": "e11e62e1-7321-4c53-b7e9-4d7a98f79a36",
+      "name": "Ask to send an email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook-test/tool-calling-ai-assistant",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "input",
+              "value": "Create a new event for me - tomorrow at 14 UTC I will have a business meeting."
+            },
+            {
+              "name": "sessionId",
+              "value": "event-1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        512,
+        -48
+      ],
+      "id": "4857defe-fbad-4c16-9e34-5ee4eba6a375",
+      "name": "Ask to create a new event"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Ask about the weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask about the weather": {
+      "main": [
+        [
+          {
+            "node": "Ask about the news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask about the news": {
+      "main": [
+        [
+          {
+            "node": "Ask about the positive news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask about the positive news": {
+      "main": [
+        [
+          {
+            "node": "Ask to send an email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask to send an email": {
+      "main": [
+        [
+          {
+            "node": "Ask to create a new event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1d9ec9d0-5bc3-40b5-9dfc-af5d50f70568",
+  "meta": {
+    "instanceId": "f91c10a867a3e8288e8b7b9a4c99f81e0b214263ed5023545d049df86d2546ea"
+  },
+  "nodeGroups": [],
+  "id": "D8wXiZfNpGPdg4Ym",
+  "tags": []
+}
