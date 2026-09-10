@@ -1,16 +1,20 @@
 import json
 import os
+import uuid
 from pathlib import Path
 from typing import TypedDict
 
 from langchain.agents import create_agent, AgentState
 from langchain.agents.middleware import before_model, HumanInTheLoopMiddleware
 from langchain.tools import tool, ToolRuntime
-from langchain.messages import HumanMessage
+from langchain.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.pregel.main import Command
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.store.memory import InMemoryStore
+from langsmith import Client as LangSmithClient
+from langsmith.evaluation import evaluate
+
 from utils import custom_print_conversation
 from dotenv import load_dotenv
 dotenv_path = Path(r'../env/.env.prod')
@@ -21,8 +25,63 @@ openai_api_key = os.environ.get("OPENAI_API_KEY")
 my_checkpointer = InMemorySaver()
 my_store = InMemoryStore()
 my_model = ChatOpenAI(model="gpt-5.6-luna", api_key=openai_api_key, use_responses_api=True, reasoning_effort="none")
-config_1 = {"configurable": {"thread_id": "thread_8"}}
-context_1 = {"user_id": "first_user_3"}
+config_1 = {"configurable": {"thread_id": "thread_9"}}
+context_1 = {"user_id": "first_user_4"}
+
+langsmith_client = LangSmithClient(api_key=os.environ.get("LANGSMITH_API_KEY"))
+langsmith_dataset = "Travel Consultant"
+if not langsmith_client.has_dataset(dataset_name=langsmith_dataset):
+  examples = [
+    {
+      "inputs": {"prompt": "I want a 4-night Aspen ski escape for 2 in February."},
+      "outputs": {"expected_behaviour": "produces structured quote, stays in luxury tier"},
+      "metadata": { "criterion": "persona_held" }
+    },
+    {
+      "inputs": {"prompt": "Recommend a backpacker route through Vietnam."},
+      "outputs": {"expected_behaviour": "politely refuses budget travel, redirects"},
+      "metadata": { "criterion": "guardrails_triggered" }
+    }
+  ]
+  langsmith_client.create_dataset(dataset_name=langsmith_dataset)
+  langsmith_client.create_examples(dataset_name=langsmith_dataset, examples=examples)
+  
+judge_model = ChatOpenAI(model="gpt-5-mini", api_key=openai_api_key, reasoning_effort="low")
+JUDGE_SYSTEM_PROMPT = "You are a strict evaluator. Reply ONLY with `1` or `0`."
+
+
+def test_agent(inputs):
+  eval_id = uuid.uuid4().hex
+  eval_config = {"configurable": {"thread_id": f"eval_{eval_id}"}}
+  eval_context = {"user_id": eval_id}
+  
+  result = travel_agent.invoke(
+    input={"messages": [HumanMessage(inputs["prompt"])]},
+    config=eval_config,
+    context=eval_context
+  )
+  return {"answer": result["messages"][-1].text}
+
+
+def judge_verdict(test_result, example, instructions: str) -> float:
+
+  verdict = judge_model.invoke([
+    SystemMessage(JUDGE_SYSTEM_PROMPT),
+    HumanMessage(
+      f"Rubric: {instructions}\n\n"
+      f"User prompt: {example.inputs['prompt']}\n"
+      f"Expected behaviour: {example.outputs['expected_behaviour']}\n"
+      f"Agent answer: {test_result.outputs['answer']}\n\n"
+      f"Did the agent satisfy the rubric? 1 = yes, 0 = no."
+    )
+  ])
+  return float(verdict.text)
+  
+def agent_stays_in_character(test_result, example):
+  return {
+    "key": "agent_stays_in_character",
+    "score":judge_verdict(test_result, example, "Did the answer stay in the warm, restrained, luxury-concierge persona (no salesy tone, no slang)?")
+  }
 
 class TravelConsultantAgentContext(TypedDict):
     user_id: str
@@ -154,7 +213,7 @@ response_2 = travel_agent.invoke(
 )
 
 response_3 = travel_agent.invoke(
-  input=Command(resume={"allowed_decisions": [{"type": "reject"}]}),
+  input=Command(resume={"decisions": [{"type": "reject"}]}),
   config=config_1,
   context=context_1
 )
@@ -168,3 +227,5 @@ custom_print_conversation(response_3["messages"])
 
 for x in my_checkpointer.list(config=config_1):
     print(f"Checkpoint: {x}")
+
+evaluate(test_agent, data=langsmith_dataset, evaluators=[agent_stays_in_character])
