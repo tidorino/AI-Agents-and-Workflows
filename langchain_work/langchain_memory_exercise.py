@@ -41,14 +41,14 @@ def explore_database(connection: sqlite3.Connection, table_name):
     connection
   )
   
-  display_graph(f"## {table_name}")
-  display_graph(result_df)
+  # display_graph(f"## {table_name}")
+  # display_graph(result_df)
 
-checkpointer_connection = sqlite3.connect("/content/checkpointer.db", check_same_thread=False, isolation_level=None)
+checkpointer_connection = sqlite3.connect("./checkpointer.db", check_same_thread=False, isolation_level=None)
 checkpointer = SqliteSaver(checkpointer_connection)
 checkpointer.setup()
 
-store_connection = sqlite3.connect("/content/store.db", check_same_thread=False, isolation_level=None)
+store_connection = sqlite3.connect("./store.db", check_same_thread=False, isolation_level=None)
 store = SqliteStore(store_connection)
 store.setup()
 
@@ -122,7 +122,8 @@ res = interact.invoke(
   },
   context={"user_id": "thread"}
 )
-custom_print_conversation(res["messages"])
+
+# custom_print_conversation(res["messages"])
 
 explore_database(checkpointer_connection, "checkpoints")
 explore_database(store_connection, "store")
@@ -138,7 +139,7 @@ res1 = interact.invoke(
   },
   context={"user_id": "thread"}
 )
-custom_print_conversation(res1["messages"])
+# custom_print_conversation(res1["messages"])
 # result = agent.invoke(
 #     input={
 #         "messages": [
